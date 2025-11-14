@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if view.object %}Edit User{% else %}Add User{% endif %}
+{% endblock %}
+
+{% block content %}
+<h2>{% if view.object %}Edit User{% else %}Add User{% endif %}</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">{% if view.object %}Update{% else %}Add{% endif %}</button>
+    <a href="{% url 'core:user_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

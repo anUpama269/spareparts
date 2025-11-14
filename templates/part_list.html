@@ -1,0 +1,721 @@
+{% extends 'base.html' %}
+{% block title %}Parts{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-5">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bold mb-1">Parts Inventory</h1>
+            <p class="text-muted mb-0">Manage your parts catalog and stock levels</p>
+        </div>
+        <a href="{% url 'parts:part_add' %}" class="btn btn-primary btn-lg shadow-sm px-4">
+            <i class="bi bi-plus-circle me-2"></i>Add Part
+        </a>
+    </div>
+
+    <!-- Stats Dashboard -->
+    <div class="row mb-4 g-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Total Parts</p>
+                            <h3 class="fw-bold mb-0">{{ parts|length }}</h3>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-box-seam text-primary fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Low Stock</p>
+                            <h3 class="fw-bold mb-0 text-warning" id="lowStockCount">0</h3>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-exclamation-triangle text-warning fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Out of Stock</p>
+                            <h3 class="fw-bold mb-0 text-danger" id="outOfStockCount">0</h3>
+                        </div>
+                        <div class="bg-danger bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-x-circle text-danger fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-1 small">Total Value</p>
+                            <h3 class="fw-bold mb-0" id="totalQuantity">0</h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-graph-up text-success fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control form-control-lg border-start-0"
+                               placeholder="Search parts..." id="searchInput" autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select form-select-lg" id="categoryFilter">
+                        <option value="">All Categories</option>
+                        {% for part in parts %}
+                            {% if part.category %}
+                                <option value="{{ part.category.name }}">{{ part.category.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select form-select-lg" id="brandFilter">
+                        <option value="">All Brands</option>
+                        {% for part in parts %}
+                            {% if part.brand %}
+                                <option value="{{ part.brand.name }}">{{ part.brand.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select form-select-lg" id="stockFilter">
+                        <option value="">All Stock</option>
+                        <option value="in-stock">In Stock</option>
+                        <option value="low-stock">Low Stock</option>
+                        <option value="out-of-stock">Out of Stock</option>
+                    </select>
+                </div>
+                <div class="col-md-2 text-end">
+                    <div class="btn-group w-100" role="group">
+                        <button type="button" class="btn btn-outline-secondary" id="viewGrid">
+                            <i class="bi bi-grid-3x3-gap"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary active" id="viewList">
+                            <i class="bi bi-list-ul"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <button class="btn btn-outline-secondary btn-sm" id="sortBtn" data-sort="name-asc">
+                        <i class="bi bi-sort-alpha-down me-2"></i>Sort by Name
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm ms-2" id="exportBtn">
+                        <i class="bi bi-download me-2"></i>Export
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm ms-2" id="clearFilters">
+                        <i class="bi bi-x-circle me-2"></i>Clear Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid View -->
+    <div id="gridView" class="row g-4" style="display: none;">
+        {% for part in parts %}
+        <div class="col-sm-6 col-md-4 col-lg-3 part-item"
+             data-name="{{ part.name|lower }}"
+             data-category="{{ part.category.name|lower }}"
+             data-brand="{{ part.brand.name|lower }}"
+             data-quantity="{{ part.quantity }}"
+             data-id="{{ part.id }}">
+            <div class="card h-100 border-0 shadow-sm part-card">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3">
+                        <div class="part-icon bg-gradient rounded-3 p-3 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-box-seam text-white fs-2"></i>
+                        </div>
+                    </div>
+                    <h5 class="card-title fw-semibold mb-2">{{ part.name }}</h5>
+                    <div class="mb-3">
+                        <span class="badge bg-primary bg-opacity-10 text-primary mb-2">{{ part.category.name }}</span>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary mb-2">{{ part.brand.name }}</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-boxes text-muted me-2"></i>
+                        <span class="fw-semibold {% if part.quantity == 0 %}text-danger{% elif part.quantity < 10 %}text-warning{% else %}text-success{% endif %}">
+                            {{ part.quantity }} in stock
+                        </span>
+                    </div>
+                    <div class="mt-auto">
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'parts:part_edit' part.id %}"
+                               class="btn btn-outline-primary btn-sm flex-fill"
+                               data-bs-toggle="tooltip"
+                               title="Edit Part">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'parts:part_delete' part.id %}"
+                               class="btn btn-outline-danger btn-sm flex-fill delete-btn"
+                               data-bs-toggle="tooltip"
+                               title="Delete Part"
+                               data-part-name="{{ part.name }}">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card border-0 bg-light">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-box-seam fs-1 text-muted d-block mb-3"></i>
+                    <h5 class="text-muted mb-3">No parts available</h5>
+                    <p class="text-muted mb-4">Start building your inventory</p>
+                    <a href="{% url 'parts:part_add' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Add Your First Part
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- List View (Default) -->
+    <div id="listView" class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="px-4 py-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="selectAll">
+                                </div>
+                            </th>
+                            <th class="py-3 text-muted fw-semibold">Part Details</th>
+                            <th class="py-3 text-muted fw-semibold">Category</th>
+                            <th class="py-3 text-muted fw-semibold">Brand</th>
+                            <th class="py-3 text-muted fw-semibold text-center">Stock Level</th>
+                            <th class="py-3 text-muted fw-semibold text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for part in parts %}
+                        <tr class="part-row border-bottom"
+                            data-name="{{ part.name|lower }}"
+                            data-category="{{ part.category.name|lower }}"
+                            data-brand="{{ part.brand.name|lower }}"
+                            data-quantity="{{ part.quantity }}"
+                            data-id="{{ part.id }}">
+                            <td class="px-4">
+                                <div class="form-check">
+                                    <input class="form-check-input part-checkbox" type="checkbox" value="{{ part.id }}">
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="part-icon-sm bg-gradient rounded-2 p-2 me-3">
+                                        <i class="bi bi-box-seam text-white"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">{{ part.name }}</div>
+                                        <div class="small text-muted">ID: #{{ part.id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary fw-semibold px-3 py-2">
+                                    {{ part.category.name }}
+                                </span>
+                            </td>
+                            <td class="py-3">
+                                <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary fw-semibold px-3 py-2">
+                                    {{ part.brand.name }}
+                                </span>
+                            </td>
+                            <td class="py-3 text-center">
+                                <div class="d-flex flex-column align-items-center">
+                                    <span class="fw-bold {% if part.quantity == 0 %}text-danger{% elif part.quantity < 10 %}text-warning{% else %}text-success{% endif %}">
+                                        {{ part.quantity }}
+                                    </span>
+                                    <div class="progress mt-1" style="width: 60px; height: 4px;">
+                                        <div class="progress-bar {% if part.quantity == 0 %}bg-danger{% elif part.quantity < 10 %}bg-warning{% else %}bg-success{% endif %}"
+                                             role="progressbar"
+                                             style="width: {% if part.quantity > 50 %}100{% else %}{{ part.quantity|floatformat:0|add:'0' }}{% endif %}%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3 text-end pe-4">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{% url 'parts:part_edit' part.id %}"
+                                       class="btn btn-outline-primary"
+                                       data-bs-toggle="tooltip"
+                                       title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'parts:part_delete' part.id %}"
+                                       class="btn btn-outline-danger delete-btn"
+                                       data-bs-toggle="tooltip"
+                                       title="Delete"
+                                       data-part-name="{{ part.name }}">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-box-seam fs-1 d-block mb-3"></i>
+                                    <p class="mb-0">No parts available</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bulk Actions Bar -->
+        <div class="card-footer bg-light border-top" id="bulkActionsBar" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="text-muted"><span id="selectedCount">0</span> item(s) selected</span>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary me-2" id="bulkExportBtn">
+                        <i class="bi bi-download me-2"></i>Export Selected
+                    </button>
+                    <button class="btn btn-sm btn-danger" id="bulkDeleteBtn">
+                        <i class="bi bi-trash me-2"></i>Delete Selected
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Info -->
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <p class="text-muted mb-0">Showing <span id="visibleCount">{{ parts|length }}</span> of {{ parts|length }} parts</p>
+    </div>
+</div>
+
+<style>
+    /* Part card animations */
+    .part-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .part-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Part icon styles */
+    .part-icon {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 80px;
+        transition: all 0.3s ease;
+    }
+
+    .part-card:hover .part-icon {
+        transform: scale(1.05) rotate(3deg);
+    }
+
+    .part-icon-sm {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Table row hover */
+    .part-row {
+        transition: all 0.2s ease;
+    }
+
+    .part-row:hover {
+        background-color: rgba(102, 126, 234, 0.05);
+        transform: scale(1.01);
+    }
+
+    /* Stock level progress bar */
+    .progress {
+        border-radius: 2px;
+        background-color: #e9ecef;
+    }
+
+    /* Button animations */
+    .btn {
+        transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-group .btn:hover {
+        transform: translateY(-1px);
+        z-index: 1;
+    }
+
+    /* View toggle */
+    .btn-group .btn.active {
+        background-color: #667eea;
+        border-color: #667eea;
+        color: white;
+    }
+
+    /* Badge styles */
+    .badge {
+        font-weight: 500;
+    }
+
+    /* Stats card hover */
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Bulk actions animation */
+    #bulkActionsBar {
+        animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    // Calculate stats
+    function calculateStats() {
+        const parts = document.querySelectorAll('.part-row, .part-item');
+        let lowStock = 0;
+        let outOfStock = 0;
+        let totalQty = 0;
+
+        parts.forEach(part => {
+            const qty = parseInt(part.dataset.quantity) || 0;
+            totalQty += qty;
+            if (qty === 0) outOfStock++;
+            else if (qty < 10) lowStock++;
+        });
+
+        document.getElementById('lowStockCount').textContent = lowStock;
+        document.getElementById('outOfStockCount').textContent = outOfStock;
+        document.getElementById('totalQuantity').textContent = totalQty;
+    }
+
+    calculateStats();
+
+    // Search functionality
+    let searchTimeout;
+    document.getElementById('searchInput')?.addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            applyFilters();
+        }, 300);
+    });
+
+    // Filter functionality
+    document.getElementById('categoryFilter')?.addEventListener('change', applyFilters);
+    document.getElementById('brandFilter')?.addEventListener('change', applyFilters);
+    document.getElementById('stockFilter')?.addEventListener('change', applyFilters);
+
+    function applyFilters() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const category = document.getElementById('categoryFilter').value.toLowerCase();
+        const brand = document.getElementById('brandFilter').value.toLowerCase();
+        const stockFilter = document.getElementById('stockFilter').value;
+
+        const gridItems = document.querySelectorAll('.part-item');
+        const listRows = document.querySelectorAll('.part-row');
+        let visibleCount = 0;
+
+        function isVisible(item) {
+            const name = item.dataset.name;
+            const itemCategory = item.dataset.category;
+            const itemBrand = item.dataset.brand;
+            const qty = parseInt(item.dataset.quantity);
+
+            let matchesSearch = name.includes(searchTerm);
+            let matchesCategory = !category || itemCategory === category;
+            let matchesBrand = !brand || itemBrand === brand;
+            let matchesStock = true;
+
+            if (stockFilter === 'in-stock') matchesStock = qty > 10;
+            else if (stockFilter === 'low-stock') matchesStock = qty > 0 && qty <= 10;
+            else if (stockFilter === 'out-of-stock') matchesStock = qty === 0;
+
+            return matchesSearch && matchesCategory && matchesBrand && matchesStock;
+        }
+
+        gridItems.forEach(item => {
+            const visible = isVisible(item);
+            item.style.display = visible ? '' : 'none';
+            if (visible) visibleCount++;
+        });
+
+        listRows.forEach(row => {
+            row.style.display = isVisible(row) ? '' : 'none';
+        });
+
+        document.getElementById('visibleCount').textContent = visibleCount;
+    }
+
+    // Sort functionality
+    document.getElementById('sortBtn')?.addEventListener('click', function() {
+        const currentSort = this.dataset.sort;
+        let newSort;
+
+        if (currentSort === 'name-asc') {
+            newSort = 'name-desc';
+            this.innerHTML = '<i class="bi bi-sort-alpha-up me-2"></i>Sort by Name';
+        } else if (currentSort === 'name-desc') {
+            newSort = 'quantity-desc';
+            this.innerHTML = '<i class="bi bi-sort-numeric-down me-2"></i>Sort by Stock';
+        } else {
+            newSort = 'name-asc';
+            this.innerHTML = '<i class="bi bi-sort-alpha-down me-2"></i>Sort by Name';
+        }
+
+        this.dataset.sort = newSort;
+        sortItems(newSort);
+    });
+
+    function sortItems(sortType) {
+        const [field, order] = sortType.split('-');
+
+        // Sort grid items
+        const gridView = document.getElementById('gridView');
+        const gridItems = Array.from(document.querySelectorAll('.part-item'));
+
+        gridItems.sort((a, b) => {
+            let valA, valB;
+            if (field === 'quantity') {
+                valA = parseInt(a.dataset.quantity);
+                valB = parseInt(b.dataset.quantity);
+            } else {
+                valA = a.dataset.name;
+                valB = b.dataset.name;
+            }
+
+            if (order === 'asc') {
+                return valA > valB ? 1 : -1;
+            } else {
+                return valA < valB ? 1 : -1;
+            }
+        });
+
+        gridItems.forEach(item => gridView.appendChild(item));
+
+        // Sort list rows
+        const tbody = document.querySelector('#listView tbody');
+        const listRows = Array.from(document.querySelectorAll('.part-row'));
+
+        listRows.sort((a, b) => {
+            let valA, valB;
+            if (field === 'quantity') {
+                valA = parseInt(a.dataset.quantity);
+                valB = parseInt(b.dataset.quantity);
+            } else {
+                valA = a.dataset.name;
+                valB = b.dataset.name;
+            }
+
+            if (order === 'asc') {
+                return valA > valB ? 1 : -1;
+            } else {
+                return valA < valB ? 1 : -1;
+            }
+        });
+
+        listRows.forEach(row => tbody.appendChild(row));
+    }
+
+    // Clear filters
+    document.getElementById('clearFilters')?.addEventListener('click', function() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('categoryFilter').value = '';
+        document.getElementById('brandFilter').value = '';
+        document.getElementById('stockFilter').value = '';
+        applyFilters();
+    });
+
+    // View toggle
+    document.getElementById('viewGrid')?.addEventListener('click', function() {
+        document.getElementById('gridView').style.display = 'flex';
+        document.getElementById('listView').style.display = 'none';
+        this.classList.add('active');
+        document.getElementById('viewList').classList.remove('active');
+        localStorage.setItem('partsView', 'grid');
+    });
+
+    document.getElementById('viewList')?.addEventListener('click', function() {
+        document.getElementById('gridView').style.display = 'none';
+        document.getElementById('listView').style.display = 'block';
+        this.classList.add('active');
+        document.getElementById('viewGrid').classList.remove('active');
+        localStorage.setItem('partsView', 'list');
+    });
+
+    // Restore view
+    const savedView = localStorage.getItem('partsView');
+    if (savedView === 'grid') {
+        document.getElementById('viewGrid')?.click();
+    }
+
+    // Select all
+    document.getElementById('selectAll')?.addEventListener('change', function(e) {
+        document.querySelectorAll('.part-checkbox').forEach(cb => {
+            if (cb.closest('.part-row').style.display !== 'none') {
+                cb.checked = e.target.checked;
+            }
+        });
+        updateBulkActions();
+    });
+
+    document.querySelectorAll('.part-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', updateBulkActions);
+    });
+
+    function updateBulkActions() {
+        const selectedBoxes = document.querySelectorAll('.part-checkbox:checked');
+        const bulkBar = document.getElementById('bulkActionsBar');
+        const countSpan = document.getElementById('selectedCount');
+
+        if (selectedBoxes.length > 0) {
+            bulkBar.style.display = 'block';
+            countSpan.textContent = selectedBoxes.length;
+        } else {
+            bulkBar.style.display = 'none';
+            document.getElementById('selectAll').checked = false;
+        }
+    }
+
+    // Delete confirmation
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const partName = this.dataset.partName;
+            if (!confirm(`Are you sure you want to delete "${partName}"? This action cannot be undone.`)) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // Export functionality
+    document.getElementById('exportBtn')?.addEventListener('click', exportParts);
+    document.getElementById('bulkExportBtn')?.addEventListener('click', exportSelected);
+
+    function exportParts() {
+        const parts = [];
+        document.querySelectorAll('.part-row').forEach(row => {
+            if (row.style.display !== 'none') {
+                parts.push(getPartData(row));
+            }
+        });
+        downloadCSV(parts, 'parts_export.csv');
+    }
+
+    function exportSelected() {
+        const parts = [];
+        document.querySelectorAll('.part-checkbox:checked').forEach(cb => {
+            const row = cb.closest('.part-row');
+            parts.push(getPartData(row));
+        });
+        downloadCSV(parts, 'parts_selected.csv');
+    }
+
+    function getPartData(row) {
+        return {
+            id: row.dataset.id,
+            name: row.querySelector('.fw-semibold').textContent,
+            category: row.dataset.category,
+            brand: row.dataset.brand,
+            quantity: row.dataset.quantity
+        };
+    }
+
+    function downloadCSV(data, filename) {
+        const csv = 'ID,Name,Category,Brand,Quantity\n' +
+                    data.map(p => `${p.id},${p.name},${p.category},${p.brand},${p.quantity}`).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    // Bulk delete
+    document.getElementById('bulkDeleteBtn')?.addEventListener('click', function() {
+        const count = document.querySelectorAll('.part-checkbox:checked').length;
+        if (confirm(`Delete ${count} part(s)? This cannot be undone.`)) {
+            console.log('Bulk delete');
+        }
+    });
+
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+
+    // Remove duplicate options from filters
+    ['categoryFilter', 'brandFilter'].forEach(filterId => {
+        const select = document.getElementById(filterId);
+        if (select) {
+            const seen = new Set();
+            Array.from(select.options).forEach(option => {
+                if (option.value && seen.has(option.value)) {
+                    option.remove();
+                } else if (option.value) {
+                    seen.add(option.value);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

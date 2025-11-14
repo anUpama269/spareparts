@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    {% if form.instance.pk %}
+        Edit Supplier | Procurement
+    {% else %}
+        Add Supplier | Procurement
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-dark text-white">
+        <h4 class="mb-0">
+            {% if form.instance.pk %} Edit Supplier {% else %} Add Supplier {% endif %}
+        </h4>
+    </div>
+
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <div class="mt-3">
+                <button type="submit" class="btn btn-success">
+                    <i class="fa fa-check"></i> Save
+                </button>
+                <a href="{% url 'procurement:supplier_list' %}" class="btn btn-secondary">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

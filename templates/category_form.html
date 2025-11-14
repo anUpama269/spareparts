@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if view.object %}Edit {{ view.object.name }}{% else %}Add Category{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-5">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'parts:category_list' %}" class="text-decoration-none">Categories</a></li>
+            <li class="breadcrumb-item active" aria-current="page">
+                {% if view.object %}Edit{% else %}Add{% endif %}
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="mb-5">
+        <div class="d-flex align-items-center mb-2">
+            <div class="bg-primary bg-opacity-10 rounded-3 p-3 me-3">
+                <i class="bi bi-{% if view.object %}pencil-square{% else %}plus-circle{% endif %} text-primary fs-3"></i>
+            </div>
+            <div>
+                <h1 class="fw-bold mb-1">
+                    {% if view.object %}Edit Category{% else %}Create New Category{% endif %}
+                </h1>
+                <p class="text-muted mb-0">
+                    {% if view.object %}
+                        Update information for "{{ view.object.name }}"
+                    {% else %}
+                        Add a new category to organize your parts
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" id="categoryForm">
+                        {% csrf_token %}
+
+                        {% if form.errors %}
+                        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                                <div>
+                                    <strong>Please correct the following errors:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        {% for field in form %}
+                                            {% for error in field.errors %}
+                                                <li>{{ field.label }}: {{ error }}</li>
+                                            {% endfor %}
+                                        {% endfor %}
+                                        {% for error in form.non_field_errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
+
+                        <!-- Form Fields -->
+                        <div class="mb-4">
+                            {% for field in form %}
+                                <div class="mb-4">
+                                    <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
+                                        {{ field.label }}
+                                        {% if field.field.required %}
+                                            <span class="text-danger">*</span>
+                                        {% endif %}
+                                    </label>
+
+                                    {% if field.field.widget.input_type == 'textarea' %}
+                                        <textarea
+                                            name="{{ field.name }}"
+                                            id="{{ field.id_for_label }}"
+                                            class="form-control form-control-lg {% if field.errors %}is-invalid{% endif %}"
+                                            rows="4"
+                                            {% if field.field.required %}required{% endif %}
+                                            placeholder="{{ field.help_text|default:'Enter '|add:field.label|lower }}"
+                                        >{{ field.value|default:'' }}</textarea>
+                                    {% elif field.field.widget.input_type == 'select' %}
+                                        <select
+                                            name="{{ field.name }}"
+                                            id="{{ field.id_for_label }}"
+                                            class="form-select form-select-lg {% if field.errors %}is-invalid{% endif %}"
+                                            {% if field.field.required %}required{% endif %}
+                                        >
+                                            {{ field }}
+                                        </select>
+                                    {% elif field.field.widget.input_type == 'checkbox' %}
+                                        <div class="form-check form-switch">
+                                            <input
+                                                type="checkbox"
+                                                name="{{ field.name }}"
+                                                id="{{ field.id_for_label }}"
+                                                class="form-check-input {% if field.errors %}is-invalid{% endif %}"
+                                                {% if field.value %}checked{% endif %}
+                                            >
+                                            <label class="form-check-label" for="{{ field.id_for_label }}">
+                                                {{ field.help_text|default:'Enable this option' }}
+                                            </label>
+                                        </div>
+                                    {% else %}
+                                        <input
+                                            type="{{ field.field.widget.input_type|default:'text' }}"
+                                            name="{{ field.name }}"
+                                            id="{{ field.id_for_label }}"
+                                            class="form-control form-control-lg {% if field.errors %}is-invalid{% endif %}"
+                                            value="{{ field.value|default:'' }}"
+                                            {% if field.field.required %}required{% endif %}
+                                            placeholder="{{ field.help_text|default:'Enter '|add:field.label|lower }}"
+                                        >
+                                    {% endif %}
+
+                                    {% if field.help_text and field.field.widget.input_type != 'checkbox' %}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle me-1"></i>{{ field.help_text }}
+                                        </div>
+                                    {% endif %}
+
+                                    {% if field.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ field.errors|first }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-column flex-sm-row gap-3 pt-3 border-top">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 d-flex align-items-center justify-content-center">
+                                <i class="bi bi-check-circle me-2"></i>
+                                {% if view.object %}Update Category{% else %}Create Category{% endif %}
+                            </button>
+                            <a href="{% url 'parts:category_list' %}" class="btn btn-outline-secondary btn-lg px-5 d-flex align-items-center justify-content-center">
+                                <i class="bi bi-x-circle me-2"></i>
+                                Cancel
+                            </a>
+                        </div>
+
+                        {% if view.object %}
+                        <div class="mt-4 pt-3 border-top">
+                            <a href="{% url 'parts:category_delete' view.object.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to delete this category?')">
+                                <i class="bi bi-trash me-2"></i>Delete Category
+                            </a>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+
+            <!-- Additional Info Card -->
+            <div class="card border-0 bg-light mt-4">
+                <div class="card-body p-4">
+                    <div class="d-flex">
+                        <i class="bi bi-lightbulb text-warning fs-4 me-3"></i>
+                        <div>
+                            <h6 class="fw-semibold mb-2">Tips for Creating Categories</h6>
+                            <ul class="small text-muted mb-0 ps-3">
+                                <li>Use clear, descriptive names that are easy to understand</li>
+                                <li>Keep category names concise (2-3 words when possible)</li>
+                                <li>Consider how parts will be organized and searched</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control:focus,
+    .form-select:focus,
+    .form-check-input:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+
+    .form-control-lg,
+    .form-select-lg {
+        transition: all 0.2s ease;
+    }
+
+    .form-control-lg:focus,
+    .form-select-lg:focus {
+        transform: translateY(-1px);
+    }
+
+    .btn {
+        transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+    }
+
+    .card {
+        transition: box-shadow 0.3s ease;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "›";
+        font-size: 1.2em;
+    }
+
+    .alert {
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    // Form validation feedback
+    document.getElementById('categoryForm')?.addEventListener('submit', function(e) {
+        const form = this;
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+
+    // Auto-focus first input field
+    document.addEventListener('DOMContentLoaded', function() {
+        const firstInput = document.querySelector('.form-control, .form-select');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    });
+
+    // Character counter for text fields (optional)
+    document.querySelectorAll('input[type="text"], textarea').forEach(input => {
+        if (input.maxLength > 0) {
+            const counter = document.createElement('div');
+            counter.className = 'form-text text-end';
+            counter.innerHTML = `<small><span class="char-count">${input.value.length}</span> / ${input.maxLength}</small>`;
+            input.parentNode.appendChild(counter);
+
+            input.addEventListener('input', function() {
+                counter.querySelector('.char-count').textContent = this.value.length;
+            });
+        }
+    });
+</script>
+{% endblock %}

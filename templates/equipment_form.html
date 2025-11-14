@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if view.object %}
+        Edit Equipment - {{ view.object.name }}
+    {% else %}
+        Add Equipment
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">
+    {% if view.object %}
+        Edit Equipment - {{ view.object.name }}
+    {% else %}
+        Add Equipment
+    {% endif %}
+</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="mt-3">
+        <button type="submit" class="btn btn-success">
+            {% if view.object %}Update{% else %}Add{% endif %}
+        </button>
+        <a href="{% url 'inventory:equipment_list' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}

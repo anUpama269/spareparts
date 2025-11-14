@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% load rbac %}
+{% block title %}{{ item.part.name }} inventory{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4"><div><h1 class="h3 mb-1">{{ item.part.name }}</h1><p class="text-muted mb-0">Part {{ item.part.part_number }} at {{ item.location.name }}</p></div><a class="btn btn-outline-secondary" href="{% url 'inventory:inventoryitem_list' %}">Back to inventory</a></div>
+  <div class="row g-4">
+    <div class="col-md-4"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted">Current quantity</div><div class="display-5 fw-bold">{{ item.quantity }}</div>{% if item.quantity == 0 %}<span class="badge bg-danger">Out of stock</span>{% elif item.quantity <= item.min_quantity %}<span class="badge bg-warning text-dark">Low stock</span>{% else %}<span class="badge bg-success">In stock</span>{% endif %}</div></div></div>
+    <div class="col-md-8"><div class="card border-0 shadow-sm"><div class="card-body"><dl class="row mb-0"><dt class="col-sm-4">Category</dt><dd class="col-sm-8">{{ item.part.category.name|default:"Uncategorized" }}</dd><dt class="col-sm-4">Brand</dt><dd class="col-sm-8">{{ item.part.brand.name|default:"Unbranded" }}</dd><dt class="col-sm-4">Location</dt><dd class="col-sm-8">{{ item.location.name }}</dd><dt class="col-sm-4">Reorder level</dt><dd class="col-sm-8">{{ item.min_quantity }}</dd><dt class="col-sm-4">Description</dt><dd class="col-sm-8">{{ item.part.description|default:"No description provided." }}</dd></dl></div></div></div>
+  </div>
+  {% if user|has_access:'inventory.manage' %}<div class="mt-4"><a class="btn btn-warning" href="{% url 'inventory:inventoryitem_edit' item.pk %}">Edit inventory</a> <a class="btn btn-danger" href="{% url 'inventory:inventoryitem_delete' item.pk %}">Delete inventory</a></div>{% endif %}
+</div>
+{% endblock %}

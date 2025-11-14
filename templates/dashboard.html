@@ -1,0 +1,448 @@
+{% extends "base.html" %}
+{% load static rbac %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1 fw-bold">Welcome back, {{ user.username }}! 👋</h1>
+                    <p class="text-muted mb-0">Here's what's happening with your inventory today.</p>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted">Last updated: <span id="currentTime"></span></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== ADMIN DASHBOARD ===================== -->
+    {% if user.is_superuser %}
+
+    <!-- Stats Cards with Gradient -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                <div class="card-body position-relative">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2 small text-uppercase fw-semibold">Total Users</p>
+                            <h3 class="mb-0 fw-bold">{{ total_users }}</h3>
+                            <small class="text-muted">Registered accounts</small>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-3">
+                            <i class="bi bi-people-fill text-primary fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                <div class="card-body position-relative">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2 small text-uppercase fw-semibold">Locations</p>
+                            <h3 class="mb-0 fw-bold">{{ total_locations }}</h3>
+                            <small class="text-muted">Storage sites</small>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-3">
+                            <i class="bi bi-pin-map-fill text-success fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                <div class="card-body position-relative">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2 small text-uppercase fw-semibold">Total Items</p>
+                            <h3 class="mb-0 fw-bold">{{ total_items }}</h3>
+                            <small class="text-muted">Inventory records</small>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-3">
+                            <i class="bi bi-box-seam-fill text-warning fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden">
+                <div class="card-body position-relative">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2 small text-uppercase fw-semibold">Transactions</p>
+                            <h3 class="mb-0 fw-bold">{{ total_transactions }}</h3>
+                            <small class="text-muted">All recorded movements</small>
+                        </div>
+                        <div class="bg-danger bg-opacity-10 p-3 rounded-3">
+                            <i class="bi bi-receipt text-danger fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions & Out of Stock Side by Side -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-4 pb-3 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Recent Transactions</h5>
+                        <a href="{% url 'inventory:stocktransaction_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 px-4 py-3 text-muted small text-uppercase">Item</th>
+                                    <th class="border-0 py-3 text-muted small text-uppercase">Quantity</th>
+                                    <th class="border-0 py-3 text-muted small text-uppercase">User</th>
+                                    <th class="border-0 py-3 text-muted small text-uppercase">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for txn in recent_transactions %}
+                                <tr>
+                                    <td class="px-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
+                                                <i class="bi bi-box text-primary"></i>
+                                            </div>
+                                            <span class="fw-semibold">{{ txn.inventory_item.part.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge bg-light text-dark border">{{ txn.quantity }}</span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-secondary bg-opacity-10 rounded-circle p-2 me-2" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-person-fill text-secondary small"></i>
+                                            </div>
+                                            {{ txn.performed_by.username }}
+                                        </div>
+                                    </td>
+                                    <td class="py-3 text-muted small">{{ txn.timestamp|date:"M d, Y H:i" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                        No recent transactions
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-4 pb-3 px-4">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Low Stock Alert</h5>
+                </div>
+                <div class="card-body px-4">
+                    {% for item in out_of_stock_items %}
+                    <div class="d-flex justify-content-between align-items-center p-3 mb-3 rounded-3 bg-danger bg-opacity-10 border border-danger border-opacity-25">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 fw-semibold">{{ item.part.name }}</h6>
+                            <small class="text-muted"><i class="bi bi-geo-alt"></i> {{ item.location.name }}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-danger rounded-pill px-3 py-2">{{ item.quantity }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-check-circle text-success fs-1 d-block mb-2"></i>
+                        <p class="text-muted mb-0">All items are in stock</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ===================== INVENTORY MANAGER ===================== -->
+    {% if user|has_access:'inventory.view' %}
+
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 pt-4 pb-3 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-grid-3x3-gap text-primary me-2"></i>Inventory Items</h5>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'inventory:inventoryitem_list' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-funnel"></i> View inventory</a>
+                            <a href="{% url 'inventory:inventoryitem_add' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg"></i> Add Item</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 px-4 py-3 text-muted small text-uppercase">Part Name</th>
+                                    <th class="border-0 py-3 text-muted small text-uppercase">Location</th>
+                                    <th class="border-0 py-3 text-muted small text-uppercase">Quantity</th>
+                                    <th class="border-0 py-3 text-muted small text-uppercase">Min Quantity</th>
+                                    <th class="border-0 py-3 text-muted small text-uppercase">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td class="px-4 py-3 fw-semibold">{{ item.part.name }}</td>
+                                    <td class="py-3"><i class="bi bi-geo-alt text-muted me-1"></i>{{ item.location.name }}</td>
+                                    <td class="py-3"><span class="badge bg-light text-dark border">{{ item.quantity }}</span></td>
+                                    <td class="py-3 text-muted">{{ item.min_quantity }}</td>
+                                    <td class="py-3">
+                                        {% if item.quantity > item.min_quantity %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">In Stock</span>
+                                        {% else %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Low Stock</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">No items found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 pt-4 pb-3 px-4">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-tools text-warning me-2"></i>Equipment</h5>
+                </div>
+                <div class="card-body px-4">
+                    {% for eq in equipment %}
+                    <div class="d-flex align-items-center p-3 mb-2 rounded-3 bg-light border">
+                        <div class="bg-warning bg-opacity-10 p-2 rounded me-3">
+                            <i class="bi bi-wrench text-warning"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-semibold">{{ eq.name }}</h6>
+                            <small class="text-muted">{{ eq.part.name }} • {{ eq.location.name }}</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-muted">No equipment found</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 pt-4 pb-3 px-4">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Recent Transactions</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 px-4 py-3 text-muted small">Item</th>
+                                    <th class="border-0 py-3 text-muted small">Quantity</th>
+                                    <th class="border-0 py-3 text-muted small">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for txn in recent_transactions %}
+                                <tr>
+                                    <td class="px-4 py-3 fw-semibold">{{ txn.inventory_item.part.name }}</td>
+                                    <td class="py-3"><span class="badge bg-light text-dark border">{{ txn.quantity }}</span></td>
+                                    <td class="py-3 text-muted small">{{ txn.timestamp|date:"M d, H:i" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center py-4 text-muted">No transactions</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ===================== PROCUREMENT OFFICER ===================== -->
+    {% if user|has_access:'procurement.view' %}
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 pt-4 pb-3 px-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold"><i class="bi bi-building text-info me-2"></i>Suppliers</h5>
+                        <a href="{% url 'procurement:supplier_add' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg"></i> Add</a>
+                    </div>
+                </div>
+                <div class="card-body px-4">
+                    {% for sup in suppliers %}
+                    <div class="d-flex align-items-center justify-content-between p-3 mb-2 rounded-3 bg-light border">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-info bg-opacity-10 p-2 rounded me-3">
+                                <i class="bi bi-shop text-info"></i>
+                            </div>
+                            <h6 class="mb-0 fw-semibold">{{ sup.name }}</h6>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-three-dots-vertical"></i></button>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-muted">No suppliers found</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 pt-4 pb-3 px-4">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-receipt text-primary me-2"></i>Your Transactions</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 px-4 py-3 text-muted small">Item</th>
+                                    <th class="border-0 py-3 text-muted small">Quantity</th>
+                                    <th class="border-0 py-3 text-muted small">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for txn in recent_transactions %}
+                                <tr>
+                                    <td class="px-4 py-3 fw-semibold">{{ txn.inventory_item.part.name }}</td>
+                                    <td class="py-3"><span class="badge bg-light text-dark border">{{ txn.quantity }}</span></td>
+                                    <td class="py-3 text-muted small">{{ txn.timestamp|date:"M d, H:i" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center py-4 text-muted">No transactions found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ===================== TECHNICIAN ===================== -->
+    {% if user|has_access:'workorders.view' %}
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 pt-4 pb-3 px-4">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-list-task text-success me-2"></i>Your Tasks</h5>
+                </div>
+                <div class="card-body px-4">
+                    {% for task in tasks %}
+                    <div class="d-flex align-items-center justify-content-between p-3 mb-3 rounded-3 border">
+                        <div class="d-flex align-items-center flex-grow-1">
+                            <div class="form-check me-3">
+                                <input class="form-check-input" type="checkbox" id="task{{ forloop.counter }}">
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-semibold">{{ task.name }}</h6>
+                                <small class="text-muted">Assigned task</small>
+                            </div>
+                        </div>
+                        <span class="badge bg-info-subtle text-info border border-info-subtle">{{ task.status }}</span>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-check-circle text-success fs-1 d-block mb-2"></i>
+                        <p class="text-muted mb-0">No tasks assigned</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 pt-4 pb-3 px-4">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Recent Activity</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 px-4 py-3 text-muted small">Item</th>
+                                    <th class="border-0 py-3 text-muted small">Quantity</th>
+                                    <th class="border-0 py-3 text-muted small">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for txn in recent_transactions %}
+                                <tr>
+                                    <td class="px-4 py-3 fw-semibold">{{ txn.inventory_item.part.name }}</td>
+                                    <td class="py-3"><span class="badge bg-light text-dark border">{{ txn.quantity }}</span></td>
+                                    <td class="py-3 text-muted small">{{ txn.timestamp|date:"M d, H:i" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center py-4 text-muted">No transactions found</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Update current time
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        const timeElement = document.getElementById('currentTime');
+        if (timeElement) {
+            timeElement.textContent = timeString;
+        }
+    }
+    updateTime();
+    setInterval(updateTime, 60000);
+</script>
+{% endblock %}

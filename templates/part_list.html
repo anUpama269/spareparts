@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% load rbac %}
+{% block title %}Parts{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div><h1 class="h3 mb-1">Parts</h1><p class="text-muted mb-0">{{ parts|length }} part{{ parts|length|pluralize }} · {{ total_stock }} units in inventory</p></div>
+    {% if user|has_access:'parts.manage' %}<a class="btn btn-primary" href="{% url 'parts:part_add' %}"><i class="bi bi-plus-lg"></i> Add part</a>{% endif %}
+  </div>
+  <form method="get" class="card card-body border-0 shadow-sm mb-4">
+    <div class="row g-3">
+      <div class="col-md-5"><label class="form-label" for="search">Search</label><input class="form-control" id="search" name="search" value="{{ request.GET.search }}" placeholder="Name or part number"></div>
+      <div class="col-md-3"><label class="form-label" for="category">Category</label><select class="form-select" id="category" name="category"><option value="">All categories</option>{% for category in categories %}<option value="{{ category.pk }}" {% if request.GET.category == category.pk|stringformat:'s' %}selected{% endif %}>{{ category.name }}</option>{% endfor %}</select></div>
+      <div class="col-md-3"><label class="form-label" for="brand">Brand</label><select class="form-select" id="brand" name="brand"><option value="">All brands</option>{% for brand in brands %}<option value="{{ brand.pk }}" {% if request.GET.brand == brand.pk|stringformat:'s' %}selected{% endif %}>{{ brand.name }}</option>{% endfor %}</select></div>
+      <div class="col-md-1 d-flex align-items-end"><button class="btn btn-outline-primary w-100" title="Apply filters"><i class="bi bi-search"></i></button></div>
+    </div>
+  </form>
+  <div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+    <thead class="table-light"><tr><th>Part</th><th>Category</th><th>Brand</th><th>Inventory</th><th class="text-end">Actions</th></tr></thead>
+    <tbody>{% for part in parts %}<tr>
+      <td><div class="fw-semibold">{{ part.name }}</div><small class="text-muted">{{ part.part_number }}</small></td>
+      <td>{{ part.category.name|default:"Uncategorized" }}</td><td>{{ part.brand.name|default:"Unbranded" }}</td>
+      <td><span class="badge {% if part.stock_quantity %}bg-success{% else %}bg-danger{% endif %}">{{ part.stock_quantity }} units</span></td>
+      <td class="text-end">{% if user|has_access:'parts.manage' %}<a class="btn btn-sm btn-outline-warning" href="{% url 'parts:part_edit' part.pk %}">Edit</a> <a class="btn btn-sm btn-outline-danger" href="{% url 'parts:part_delete' part.pk %}">Delete</a>{% else %}<span class="text-muted">View only</span>{% endif %}</td>
+    </tr>{% empty %}<tr><td colspan="5" class="text-center text-muted py-5">No parts match the current filters.</td></tr>{% endfor %}</tbody>
+  </table></div></div>
+</div>
+{% endblock %}

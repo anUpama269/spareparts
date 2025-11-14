@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static rbac %}
+{% block title %}Work Orders | Procurement{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Work Orders</h2>
+
+    {% if user|has_access:'workorders.manage' %}
+    <a href="{% url 'procurement:workorder_add' %}" class="btn btn-primary">
+        <i class="fa fa-plus"></i> Add Work Order
+    </a>
+    {% endif %}
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Order Title</th>
+                    <th>Assigned Technician</th>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wo in workorders %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ wo.title }}</td>
+                    <td>{{ wo.technician.username }}</td>
+                    <td>{{ wo.status }}</td>
+                    <td>{{ wo.created_at|date:"d M Y" }}</td>
+
+                    <td class="text-end">
+
+                        {# --- Technicians can only view --- #}
+                        {% if user|has_access:'workorders.view' %}
+                            <span class="badge bg-secondary">View Only</span>
+                        {% endif %}
+
+                        {# --- Admin & procurement manager can edit/delete --- #}
+                        {% if user|has_access:'workorders.manage' %}
+                        <a href="{% url 'procurement:workorder_edit' wo.pk %}" class="btn btn-sm btn-warning">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        <a href="{% url 'procurement:workorder_delete' wo.pk %}" class="btn btn-sm btn-danger">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">No work orders found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

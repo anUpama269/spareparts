@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Equipment{% endblock %}
+
+{% block content %}
+<div class="mt-5">
+    <h2 class="mb-4 text-danger">Confirm Delete</h2>
+    <p>Are you sure you want to delete the equipment: <strong>{{ object.name }}</strong>?</p>
+
+    <form method="post" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+    </form>
+    <a href="{% url 'inventory:equipment_list' %}" class="btn btn-secondary">Cancel</a>
+</div>
+{% endblock %}

@@ -1,0 +1,374 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Us - SpareParts{% endblock %}
+
+{% block content %}
+
+<!-- Header Section -->
+<section class="py-5 mb-4">
+    <div class="text-center">
+        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3">
+            <i class="bi bi-chat-dots me-1"></i>Get In Touch
+        </span>
+        <h1 class="display-4 fw-bold mb-3">Contact Us</h1>
+        <p class="text-muted lead mb-0">
+            Have questions? We're here to help and answer any questions you might have.
+        </p>
+    </div>
+</section>
+
+<!-- Contact Info Cards -->
+<section class="mb-5">
+    <div class="row g-4">
+        <div class="col-lg-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 rounded-4 hover-lift">
+                <div class="card-body p-4 text-center">
+                    <div class="bg-primary bg-opacity-10 rounded-circle p-4 d-inline-flex mb-3">
+                        <i class="bi bi-telephone-fill text-primary fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Call Us</h5>
+                    <p class="text-muted mb-3">Mon-Fri from 8am to 5pm</p>
+                    <a href="tel:+919876543210" class="text-decoration-none fw-semibold text-primary">
+                        +91 98765 43210
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 rounded-4 hover-lift">
+                <div class="card-body p-4 text-center">
+                    <div class="bg-success bg-opacity-10 rounded-circle p-4 d-inline-flex mb-3">
+                        <i class="bi bi-envelope-fill text-success fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Email Us</h5>
+                    <p class="text-muted mb-3">We'll respond within 24 hours</p>
+                    <a href="mailto:support@spareparts.com" class="text-decoration-none fw-semibold text-success">
+                        support@spareparts.com
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="card border-0 shadow-sm h-100 rounded-4 hover-lift">
+                <div class="card-body p-4 text-center">
+                    <div class="bg-warning bg-opacity-10 rounded-circle p-4 d-inline-flex mb-3">
+                        <i class="bi bi-geo-alt-fill text-warning fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Visit Us</h5>
+                    <p class="text-muted mb-3">Come say hello at our office</p>
+                    <address class="mb-0 fw-semibold text-dark" style="font-style: normal;">
+                        123 SpareParts Street<br>
+                        Mumbai, India
+                    </address>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Contact Section -->
+<section class="mb-5">
+    <div class="row g-4">
+        <!-- Contact Form -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="mb-4">
+                        <h3 class="fw-bold mb-2">Send us a Message</h3>
+                        <p class="text-muted">Fill out the form below and we'll get back to you as soon as possible.</p>
+                    </div>
+
+                    <form method="post" id="contactForm">
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label fw-semibold">
+                                    Full Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control form-control-lg rounded-3"
+                                       id="name"
+                                       name="name"
+                                       placeholder="John Doe"
+                                       required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="email" class="form-label fw-semibold">
+                                    Email Address <span class="text-danger">*</span>
+                                </label>
+                                <input type="email"
+                                       class="form-control form-control-lg rounded-3"
+                                       id="email"
+                                       name="email"
+                                       placeholder="john@example.com"
+                                       required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label fw-semibold">
+                                    Phone Number
+                                </label>
+                                <input type="tel"
+                                       class="form-control form-control-lg rounded-3"
+                                       id="phone"
+                                       name="phone"
+                                       placeholder="+91 98765 43210">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="subject" class="form-label fw-semibold">
+                                    Subject <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select form-select-lg rounded-3" id="subject" name="subject" required>
+                                    <option value="" selected disabled>Select a topic</option>
+                                    <option value="general">General Inquiry</option>
+                                    <option value="support">Technical Support</option>
+                                    <option value="sales">Sales Question</option>
+                                    <option value="feedback">Feedback</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="message" class="form-label fw-semibold">
+                                    Message <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control form-control-lg rounded-3"
+                                          id="message"
+                                          name="message"
+                                          rows="6"
+                                          placeholder="Tell us more about your inquiry..."
+                                          required></textarea>
+                                <small class="text-muted">Please provide as much detail as possible</small>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="privacy" required>
+                                    <label class="form-check-label text-muted small" for="privacy">
+                                        I agree to the <a href="#" class="text-primary">Privacy Policy</a> and
+                                        <a href="#" class="text-primary">Terms of Service</a>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary btn-lg px-5 py-3 rounded-3 shadow-sm w-100">
+                                    <i class="bi bi-send me-2"></i>Send Message
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Info Sidebar -->
+        <div class="col-lg-5">
+            <!-- Business Hours Card -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-info bg-opacity-10 p-3 rounded-3 me-3">
+                            <i class="bi bi-clock-fill text-info fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Business Hours</h5>
+                    </div>
+
+                    <div class="border-start border-3 border-info ps-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Monday - Friday</span>
+                            <span class="fw-semibold">8:00 AM - 5:00 PM</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Saturday</span>
+                            <span class="fw-semibold">9:00 AM - 2:00 PM</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Sunday</span>
+                            <span class="fw-semibold text-danger">Closed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Card -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-secondary bg-opacity-10 p-3 rounded-3 me-3">
+                            <i class="bi bi-question-circle-fill text-secondary fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Need Quick Answers?</h5>
+                    </div>
+
+                    <p class="text-muted mb-3">
+                        Check out our FAQ section for instant answers to common questions.
+                    </p>
+
+                    <a href="#" class="btn btn-outline-secondary btn-sm rounded-3 w-100">
+                        <i class="bi bi-book me-2"></i>View FAQs
+                    </a>
+                </div>
+            </div>
+
+            <!-- Social Media Card -->
+            <div class="card border-0 shadow-sm rounded-4"
+                 style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(8, 145, 178, 0.05));">
+                <div class="card-body p-4 text-center">
+                    <h5 class="fw-bold mb-3">Connect With Us</h5>
+                    <p class="text-muted mb-4">Follow us on social media for updates and news</p>
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="#" class="btn btn-primary rounded-circle p-3" style="width: 50px; height: 50px;">
+                            <i class="fab fa-facebook fs-5"></i>
+                        </a>
+                        <a href="#" class="btn btn-info rounded-circle p-3" style="width: 50px; height: 50px;">
+                            <i class="fab fa-twitter fs-5"></i>
+                        </a>
+                        <a href="#" class="btn btn-danger rounded-circle p-3" style="width: 50px; height: 50px;">
+                            <i class="fab fa-linkedin fs-5"></i>
+                        </a>
+                        <a href="#" class="btn btn-success rounded-circle p-3" style="width: 50px; height: 50px;">
+                            <i class="fab fa-whatsapp fs-5"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section (Optional) -->
+<section class="mb-5">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-0">
+            <div style="height: 400px; background: linear-gradient(135deg, #e0f2fe, #dbeafe); display: flex; align-items: center; justify-content: center;">
+                <div class="text-center">
+                    <i class="bi bi-map text-primary" style="font-size: 4rem; opacity: 0.3;"></i>
+                    <p class="text-muted mt-3">Interactive map can be integrated here</p>
+                </div>
+                <!-- Replace with actual map integration like Google Maps -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5">
+    <div class="card border-0 shadow-lg rounded-4"
+         style="background: linear-gradient(135deg, #2563eb, #0891b2);">
+        <div class="card-body p-5 text-center text-white">
+            <i class="bi bi-headset fs-1 mb-3 d-block"></i>
+            <h3 class="fw-bold mb-3">Need Immediate Assistance?</h3>
+            <p class="mb-4 opacity-75">Our support team is available to help you right away</p>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a href="tel:+919876543210" class="btn btn-light btn-lg px-5 py-3 rounded-3">
+                    <i class="bi bi-telephone-fill me-2"></i>Call Now
+                </a>
+                <a href="mailto:support@spareparts.com" class="btn btn-outline-light btn-lg px-5 py-3 rounded-3">
+                    <i class="bi bi-envelope-fill me-2"></i>Email Support
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .hover-lift {
+        transition: all 0.3s ease;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.15);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #2563eb, #0891b2);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+        .display-4 {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<script>
+    // Form validation and submission handling
+    document.getElementById('contactForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Get form data
+        const formData = new FormData(this);
+
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+        submitBtn.disabled = true;
+
+        // Simulate form submission (replace with actual AJAX call)
+        setTimeout(() => {
+            // Reset button
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+
+            // Show success message
+            alert('Thank you for contacting us! We will get back to you soon.');
+            this.reset();
+        }, 2000);
+    });
+
+    // Add animation on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'all 0.6s ease';
+        observer.observe(card);
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<div class="container py-4"><form method="post" class="card card-body">{% csrf_token %}<h1 class="h4">Delete {{ object.name }}?</h1><p>Users assigned to this role will remain active but have no role.</p><button class="btn btn-danger">Delete</button></form></div>{% endblock %}

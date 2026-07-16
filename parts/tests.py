@@ -9,7 +9,7 @@ from .models import Brand, Category, Part
 class DynamicPartPagesTests(TestCase):
     def test_part_stock_is_aggregated_from_inventory(self):
         user = CustomUser.objects.create_user(
-            username='parts-manager', password='test-pass', role='inventory_manager'
+            username='parts-manager', password='test-pass'
         )
         category = Category.objects.create(name='Electrical')
         brand = Brand.objects.create(name='Database Brand')

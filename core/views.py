@@ -9,8 +9,8 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from parts.mixins import RoleRequiredMixin
 
-from .forms import UserForm, SignupForm
-from core.models import CustomUser, AuditLog
+from .forms import UserForm, SignupForm, RoleForm, AccessPermissionForm
+from core.models import CustomUser, AuditLog, Role, AccessPermission
 from inventory.models import Location, InventoryItem, StockTransaction, Equipment
 from procurement.models import Supplier, PurchaseOrder, PurchaseOrderItem, WorkOrder
 
@@ -135,6 +135,66 @@ class UserDeleteView(LoginRequiredMixin, RoleRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, 'User deleted successfully!')
         return super().delete(request, *args, **kwargs)
+
+
+class RoleListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
+    model = Role
+    template_name = 'role_list.html'
+    context_object_name = 'roles'
+    permission_required = 'users.manage'
+
+
+class RoleCreateView(LoginRequiredMixin, RoleRequiredMixin, CreateView):
+    model = Role
+    form_class = RoleForm
+    template_name = 'role_form.html'
+    success_url = reverse_lazy('core:role_list')
+    permission_required = 'users.manage'
+
+
+class RoleUpdateView(LoginRequiredMixin, RoleRequiredMixin, UpdateView):
+    model = Role
+    form_class = RoleForm
+    template_name = 'role_form.html'
+    success_url = reverse_lazy('core:role_list')
+    permission_required = 'users.manage'
+
+
+class RoleDeleteView(LoginRequiredMixin, RoleRequiredMixin, DeleteView):
+    model = Role
+    template_name = 'role_confirm_delete.html'
+    success_url = reverse_lazy('core:role_list')
+    permission_required = 'users.manage'
+
+
+class PermissionListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
+    model = AccessPermission
+    template_name = 'permission_list.html'
+    context_object_name = 'access_permissions'
+    permission_required = 'users.manage'
+
+
+class PermissionCreateView(LoginRequiredMixin, RoleRequiredMixin, CreateView):
+    model = AccessPermission
+    form_class = AccessPermissionForm
+    template_name = 'permission_form.html'
+    success_url = reverse_lazy('core:permission_list')
+    permission_required = 'users.manage'
+
+
+class PermissionUpdateView(LoginRequiredMixin, RoleRequiredMixin, UpdateView):
+    model = AccessPermission
+    form_class = AccessPermissionForm
+    template_name = 'permission_form.html'
+    success_url = reverse_lazy('core:permission_list')
+    permission_required = 'users.manage'
+
+
+class PermissionDeleteView(LoginRequiredMixin, RoleRequiredMixin, DeleteView):
+    model = AccessPermission
+    template_name = 'permission_confirm_delete.html'
+    success_url = reverse_lazy('core:permission_list')
+    permission_required = 'users.manage'
 
 
 # ------------------------------

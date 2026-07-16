@@ -1,5 +1,5 @@
 from django import forms
-from .models import CustomUser, AccessPermission
+from .models import CustomUser, AccessPermission, Role
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(required=False, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
@@ -37,9 +37,40 @@ class UserForm(forms.ModelForm):
 
 class SignupForm(UserForm):
     class Meta(UserForm.Meta):
-        fields = ['username', 'email', 'role', 'phone', 'password']
+        fields = ['username', 'email', 'phone', 'password']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields.pop('role', None)
         self.fields.pop('access_permissions', None)
         self.fields.pop('is_active', None)
+
+
+class RoleForm(forms.ModelForm):
+    permissions = forms.ModelMultipleChoiceField(
+        queryset=AccessPermission.objects.none(), required=False,
+        widget=forms.CheckboxSelectMultiple
+    )
+
+    class Meta:
+        model = Role
+        fields = ['name', 'description', 'permissions']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['permissions'].queryset = AccessPermission.objects.order_by('module', 'name')
+
+
+class AccessPermissionForm(forms.ModelForm):
+    class Meta:
+        model = AccessPermission
+        fields = ['name', 'module', 'description']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'module': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+        }

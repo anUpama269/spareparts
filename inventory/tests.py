@@ -9,7 +9,7 @@ from .models import InventoryItem, Location
 class DynamicInventoryPagesTests(TestCase):
     def setUp(self):
         self.user = CustomUser.objects.create_user(
-            username='manager', password='test-pass', role='inventory_manager'
+            username='manager', password='test-pass'
         )
         category = Category.objects.create(name='Hydraulics')
         brand = Brand.objects.create(name='Dynamic Brand')

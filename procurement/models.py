@@ -59,7 +59,7 @@ class WorkOrder(models.Model):
         CustomUser,
         on_delete=models.SET_NULL,
         null=True,
-        limit_choices_to={'role': 'technician'}
+        limit_choices_to={'role__code': 'technician'}
     )
     purchase_order = models.ForeignKey(
         PurchaseOrder,

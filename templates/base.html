@@ -511,7 +511,7 @@
                     {% if user|has_access:'equipment.view' %}<li class="nav-item"><a class="nav-link" href="{% url 'inventory:equipment_list' %}"><i class="bi bi-tools me-1"></i>Equipment</a></li>{% endif %}
                     {% if user|has_access:'procurement.view' %}<li class="nav-item"><a class="nav-link" href="{% url 'procurement:purchaseorder_list' %}"><i class="bi bi-cart me-1"></i>Procurement</a></li>{% endif %}
                     {% if user|has_access:'workorders.view' %}<li class="nav-item"><a class="nav-link" href="{% url 'procurement:workorder_list' %}"><i class="bi bi-clipboard-check me-1"></i>Work Orders</a></li>{% endif %}
-                    {% if user|has_access:'users.manage' %}<li class="nav-item"><a class="nav-link" href="{% url 'core:user_list' %}"><i class="bi bi-people me-1"></i>Users & RBAC</a></li>{% endif %}
+                    {% if user|has_access:'users.manage' %}<li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-people me-1"></i>RBAC</a><ul class="dropdown-menu"><li><a class="dropdown-item" href="{% url 'core:user_list' %}">Users</a></li><li><a class="dropdown-item" href="{% url 'core:role_list' %}">Roles</a></li><li><a class="dropdown-item" href="{% url 'core:permission_list' %}">Permissions</a></li></ul></li>{% endif %}
                     {% if user|has_access:'audit.view' %}<li class="nav-item"><a class="nav-link" href="{% url 'core:auditlog_list' %}"><i class="bi bi-shield-check me-1"></i>Audit</a></li>{% endif %}
 
                     {# Admin Navigation #}

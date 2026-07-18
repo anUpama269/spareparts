@@ -497,133 +497,47 @@
         </button>
 
         <div class="collapse navbar-collapse" id="mainNavbarContent">
-            <ul class="navbar-nav ms-auto align-items-center">
-
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
                 <li class="nav-item"><a href="{% url 'core:home' %}" class="nav-link"><i class="bi bi-house-door me-1"></i>Home</a></li>
-                <li class="nav-item"><a href="{% url 'core:dashboard' %}" class="nav-link"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
-                <li class="nav-item"><a href="{% url 'core:contact' %}" class="nav-link"><i class="bi bi-envelope me-1"></i>Contact</a></li>
 
                 {% if user.is_authenticated %}
+                    <li class="nav-item"><a href="{% url 'core:dashboard' %}" class="nav-link"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
 
-                    {% if user|has_access:'parts.view' %}<li class="nav-item"><a class="nav-link" href="{% url 'parts:part_list' %}"><i class="bi bi-box-seam me-1"></i>Parts</a></li>{% endif %}
-                    {% if user|has_access:'inventory.view' %}<li class="nav-item"><a class="nav-link" href="{% url 'inventory:inventoryitem_list' %}"><i class="bi bi-boxes me-1"></i>Inventory</a></li>{% endif %}
-                    {% if user|has_access:'transactions.view' %}<li class="nav-item"><a class="nav-link" href="{% url 'inventory:stocktransaction_list' %}"><i class="bi bi-arrow-repeat me-1"></i>Transactions</a></li>{% endif %}
-                    {% if user|has_access:'equipment.view' %}<li class="nav-item"><a class="nav-link" href="{% url 'inventory:equipment_list' %}"><i class="bi bi-tools me-1"></i>Equipment</a></li>{% endif %}
-                    {% if user|has_access:'procurement.view' %}<li class="nav-item"><a class="nav-link" href="{% url 'procurement:purchaseorder_list' %}"><i class="bi bi-cart me-1"></i>Procurement</a></li>{% endif %}
-                    {% if user|has_access:'workorders.view' %}<li class="nav-item"><a class="nav-link" href="{% url 'procurement:workorder_list' %}"><i class="bi bi-clipboard-check me-1"></i>Work Orders</a></li>{% endif %}
-                    {% if user|has_access:'users.manage' %}<li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-people me-1"></i>RBAC</a><ul class="dropdown-menu"><li><a class="dropdown-item" href="{% url 'core:user_list' %}">Users</a></li><li><a class="dropdown-item" href="{% url 'core:role_list' %}">Roles</a></li><li><a class="dropdown-item" href="{% url 'core:permission_list' %}">Permissions</a></li></ul></li>{% endif %}
-                    {% if user|has_access:'audit.view' %}<li class="nav-item"><a class="nav-link" href="{% url 'core:auditlog_list' %}"><i class="bi bi-shield-check me-1"></i>Audit</a></li>{% endif %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-grid me-1"></i>Operations</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            {% if user|has_access:'parts.view' %}<li><a class="dropdown-item" href="{% url 'parts:part_list' %}"><i class="bi bi-box-seam me-2"></i>Parts</a></li>{% endif %}
+                            {% if user|has_access:'inventory.view' %}<li><a class="dropdown-item" href="{% url 'inventory:inventoryitem_list' %}"><i class="bi bi-boxes me-2"></i>Inventory</a></li>{% endif %}
+                            {% if user|has_access:'transactions.view' %}<li><a class="dropdown-item" href="{% url 'inventory:stocktransaction_list' %}"><i class="bi bi-arrow-repeat me-2"></i>Transactions</a></li>{% endif %}
+                            {% if user|has_access:'equipment.view' %}<li><a class="dropdown-item" href="{% url 'inventory:equipment_list' %}"><i class="bi bi-tools me-2"></i>Equipment</a></li>{% endif %}
+                            {% if user|has_access:'procurement.view' %}<li><a class="dropdown-item" href="{% url 'procurement:purchaseorder_list' %}"><i class="bi bi-cart me-2"></i>Procurement</a></li>{% endif %}
+                            {% if user|has_access:'workorders.view' %}<li><a class="dropdown-item" href="{% url 'procurement:workorder_list' %}"><i class="bi bi-clipboard-check me-2"></i>Work Orders</a></li>{% endif %}
+                        </ul>
+                    </li>
 
-                    {# Admin Navigation #}
-                    {% if False %}
+                    {% if user.is_superuser %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                <i class="bi bi-box-seam me-1"></i>Parts
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'parts:part_list' %}"><i class="bi bi-box me-2"></i>Parts</a></li>
-                                <li><a class="dropdown-item" href="{% url 'parts:brand_list' %}"><i class="bi bi-tag me-2"></i>Brands</a></li>
-                                <li><a class="dropdown-item" href="{% url 'parts:category_list' %}"><i class="bi bi-folder me-2"></i>Categories</a></li>
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-shield-lock me-1"></i>Administration</a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'core:user_list' %}"><i class="bi bi-people me-2"></i>Users</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:role_list' %}"><i class="bi bi-person-badge me-2"></i>Roles</a></li>
+                                <li><a class="dropdown-item" href="{% url 'core:permission_list' %}"><i class="bi bi-key me-2"></i>Permissions</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'core:auditlog_list' %}"><i class="bi bi-journal-check me-2"></i>Audit log</a></li>
                             </ul>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                <i class="bi bi-clipboard-data me-1"></i>Inventory
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'inventory:inventoryitem_list' %}"><i class="bi bi-boxes me-2"></i>Inventory Items</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:stocktransaction_list' %}"><i class="bi bi-arrow-repeat me-2"></i>Stock Transactions</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:location_list' %}"><i class="bi bi-geo-alt me-2"></i>Locations</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:equipment_list' %}"><i class="bi bi-tools me-2"></i>Equipment</a></li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                <i class="bi bi-cart me-1"></i>Procurement
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'procurement:supplier_list' %}"><i class="bi bi-building me-2"></i>Suppliers</a></li>
-                                <li><a class="dropdown-item" href="{% url 'procurement:purchaseorder_list' %}"><i class="bi bi-receipt me-2"></i>Purchase Orders</a></li>
-                                <li><a class="dropdown-item" href="{% url 'procurement:purchaseorderitem_list' %}"><i class="bi bi-list-check me-2"></i>PO Items</a></li>
-                                <li><a class="dropdown-item" href="{% url 'procurement:workorder_list' %}"><i class="bi bi-clipboard-check me-2"></i>Work Orders</a></li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item"><a href="{% url 'core:user_list' %}" class="nav-link"><i class="bi bi-people me-1"></i>Users</a></li>
-                        <li class="nav-item"><a href="{% url 'core:auditlog_list' %}" class="nav-link"><i class="bi bi-shield-check me-1"></i>Audit Logs</a></li>
-
-                    {# Inventory Manager Navigation #}
-                    {% elif user.role == 'inventory_manager' %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                <i class="bi bi-box-seam me-1"></i>Parts
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'parts:part_list' %}"><i class="bi bi-box me-2"></i>Parts</a></li>
-                                <li><a class="dropdown-item" href="{% url 'parts:brand_list' %}"><i class="bi bi-tag me-2"></i>Brands</a></li>
-                                <li><a class="dropdown-item" href="{% url 'parts:category_list' %}"><i class="bi bi-folder me-2"></i>Categories</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                <i class="bi bi-clipboard-data me-1"></i>Inventory
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'inventory:inventoryitem_list' %}"><i class="bi bi-boxes me-2"></i>Inventory Items</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:stocktransaction_list' %}"><i class="bi bi-arrow-repeat me-2"></i>Stock Transactions</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:location_list' %}"><i class="bi bi-geo-alt me-2"></i>Locations</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:equipment_list' %}"><i class="bi bi-tools me-2"></i>Equipment</a></li>
-                            </ul>
-                        </li>
-
-                    {# Procurement Officer Navigation #}
-                    {% elif user.role == 'procurement_officer' %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                <i class="bi bi-cart me-1"></i>Procurement
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'procurement:supplier_list' %}"><i class="bi bi-building me-2"></i>Suppliers</a></li>
-                                <li><a class="dropdown-item" href="{% url 'procurement:purchaseorder_list' %}"><i class="bi bi-receipt me-2"></i>Purchase Orders</a></li>
-                                <li><a class="dropdown-item" href="{% url 'procurement:purchaseorderitem_list' %}"><i class="bi bi-list-check me-2"></i>PO Items</a></li>
-                                <li><a class="dropdown-item" href="{% url 'procurement:workorder_list' %}"><i class="bi bi-clipboard-check me-2"></i>Work Orders</a></li>
-                            </ul>
-                        </li>
-
-                    {# Technician Navigation #}
-                    {% elif user.role == 'technician' %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                <i class="bi bi-clipboard-data me-1"></i>Inventory
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'inventory:inventoryitem_list' %}"><i class="bi bi-boxes me-2"></i>Inventory Items</a></li>
-                                <li><a class="dropdown-item" href="{% url 'inventory:equipment_list' %}"><i class="bi bi-tools me-2"></i>Equipment</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'procurement:workorder_list' %}" class="nav-link">
-                                <i class="bi bi-clipboard-check me-1"></i>Work Orders
-                            </a>
                         </li>
                     {% endif %}
 
-                    <li class="nav-item ms-2">
+                    <li class="nav-item ms-lg-2">
                         <form method="post" action="{% url 'core:logout' %}" class="d-inline">
                             {% csrf_token %}
-                            <button type="submit" class="btn-link nav-link text-danger">
-                                <i class="bi bi-box-arrow-right me-1"></i>Logout
-                            </button>
+                            <button type="submit" class="btn-link nav-link text-danger"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
                         </form>
                     </li>
-
                 {% else %}
+                    <li class="nav-item"><a href="{% url 'core:contact' %}" class="nav-link"><i class="bi bi-envelope me-1"></i>Contact</a></li>
                     <li class="nav-item"><a href="{% url 'core:login' %}" class="nav-link"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a></li>
-                    <li class="nav-item"><a href="{% url 'core:signup' %}" class="nav-link"><i class="bi bi-person-plus me-1"></i>Sign Up</a></li>
                 {% endif %}
-
             </ul>
         </div>
     </div>

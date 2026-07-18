@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 
+from .forms import UserForm
 from .models import AccessPermission, CustomUser, Role
 
 
@@ -22,19 +23,11 @@ class CustomRBACTests(TestCase):
         self.client.force_login(user)
         self.assertEqual(self.client.get(reverse('core:user_list')).status_code, 403)
 
-    def test_public_signup_cannot_choose_role_or_permissions(self):
-        response = self.client.get(reverse('core:signup'))
-        self.assertNotContains(response, 'name="role"')
-        self.assertNotContains(response, 'name="access_permissions"')
+    def test_user_form_assigns_role_without_showing_permissions(self):
+        form = UserForm()
 
-        self.client.post(reverse('core:signup'), {
-            'username': 'new-user', 'email': 'new@example.com',
-            'phone': '', 'password': 'safe-test-password',
-            'role': 'admin', 'access_permissions': AccessPermission.objects.first().pk,
-        })
-        user = CustomUser.objects.get(username='new-user')
-        self.assertIsNone(user.role)
-        self.assertFalse(user.access_permissions.exists())
+        self.assertIn('role', form.fields)
+        self.assertNotIn('access_permissions', form.fields)
 
     def test_role_permissions_are_dynamic(self):
         permission = AccessPermission.objects.get(code='parts.view')
@@ -43,6 +36,31 @@ class CustomRBACTests(TestCase):
         user = CustomUser.objects.create_user(username='role-user', password='test-pass', role=role)
         self.assertTrue(user.has_access('parts.view'))
         self.assertFalse(user.has_access('parts.manage'))
+
+    def test_permission_added_to_role_is_automatically_inherited(self):
+        role = Role.objects.create(name='Store Operator', code='store-operator')
+        user = CustomUser.objects.create_user(
+            username='store-user', password='test-pass', role=role
+        )
+        permission = AccessPermission.objects.get(code='inventory.view')
+
+        self.assertFalse(user.has_access('inventory.view'))
+        role.permissions.add(permission)
+
+        self.assertTrue(user.has_access('inventory.view'))
+        self.assertIn(permission, user.get_effective_access_permissions())
+
+    def test_permission_removed_from_role_is_automatically_revoked(self):
+        permission = AccessPermission.objects.get(code='inventory.view')
+        role = Role.objects.create(name='Temporary Operator', code='temporary-operator')
+        role.permissions.add(permission)
+        user = CustomUser.objects.create_user(
+            username='temporary-user', password='test-pass', role=role
+        )
+
+        role.permissions.remove(permission)
+
+        self.assertFalse(user.has_access('inventory.view'))
 
     def test_codes_are_automatically_created(self):
         role = Role.objects.create(name='Regional Store Manager')

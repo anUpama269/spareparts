@@ -1,15 +1,14 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
-from django.views.generic import TemplateView, FormView, ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from parts.mixins import RoleRequiredMixin
 
-from .forms import UserForm, SignupForm, RoleForm, AccessPermissionForm
+from .forms import UserForm, RoleForm, AccessPermissionForm
 from core.models import CustomUser, AuditLog, Role, AccessPermission
 from inventory.models import Location, InventoryItem, StockTransaction, Equipment
 from procurement.models import Supplier, PurchaseOrder, PurchaseOrderItem, WorkOrder
@@ -18,23 +17,6 @@ from procurement.models import Supplier, PurchaseOrder, PurchaseOrderItem, WorkO
 # ------------------------------
 # AUTHENTICATION
 # ------------------------------
-
-class SignupView(FormView):
-    template_name = 'signup.html'
-    form_class = SignupForm
-    success_url = reverse_lazy('core:dashboard')
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return redirect('core:dashboard')
-        return super().dispatch(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        user = form.save(commit=False)
-        user.save()
-        login(self.request, user)
-        return super().form_valid(form)
-
 
 class CustomLoginView(LoginView):
     template_name = 'login.html'

@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),         # For signup, login, logout, dashboard
+    path('', include('core.urls')),         # Authentication, dashboard, and administration
     path('parts/', include('parts.urls')),  # Parts app
     path('inventory/', include('inventory.urls')),  # Inventory app
     path('procurement/', include('procurement.urls')),  # Procurement app

@@ -75,15 +75,20 @@ class CustomUser(AbstractUser):
         role_name = self.role.name if self.role else 'No role'
         return f"{self.username} ({role_name})"
 
+    def get_effective_access_permissions(self):
+        """Return permissions assigned directly or inherited from the user's role."""
+        permissions = AccessPermission.objects.filter(users=self)
+        if self.role_id:
+            permissions = permissions | AccessPermission.objects.filter(roles=self.role)
+        return permissions.distinct()
+
     def has_access(self, code):
         """Check role and direct custom permissions without Django groups."""
         if not self.is_authenticated or not self.is_active:
             return False
         if self.is_superuser:
             return True
-        if self.access_permissions.filter(code=code).exists():
-            return True
-        return bool(self.role_id and self.role.permissions.filter(code=code).exists())
+        return self.get_effective_access_permissions().filter(code=code).exists()
 
 
 class AuditLog(models.Model):

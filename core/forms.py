@@ -3,20 +3,15 @@ from .models import CustomUser, AccessPermission, Role
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(required=False, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-    access_permissions = forms.ModelMultipleChoiceField(
-        queryset=AccessPermission.objects.none(), required=False,
-        widget=forms.CheckboxSelectMultiple
-    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['access_permissions'].queryset = AccessPermission.objects.order_by('module', 'name')
         if not self.instance.pk:
             self.fields['password'].required = True
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'role', 'phone', 'password', 'is_active', 'access_permissions']
+        fields = ['username', 'email', 'role', 'phone', 'password', 'is_active']
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
@@ -33,17 +28,6 @@ class UserForm(forms.ModelForm):
             user.save()
             self.save_m2m()
         return user
-
-
-class SignupForm(UserForm):
-    class Meta(UserForm.Meta):
-        fields = ['username', 'email', 'phone', 'password']
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields.pop('role', None)
-        self.fields.pop('access_permissions', None)
-        self.fields.pop('is_active', None)
 
 
 class RoleForm(forms.ModelForm):

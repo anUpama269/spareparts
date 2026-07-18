@@ -4,7 +4,6 @@ app_name = 'core'
 urlpatterns = [
     path('', views.LandingView.as_view(), name='home'),
     path('contact/', views.ContactView.as_view(), name='contact'),
-    path('signup/', views.SignupView.as_view(), name='signup'),
     path('login/', views.CustomLoginView.as_view(), name='login'),
     path('logout/', views.CustomLogoutView.as_view(), name='logout'),
 

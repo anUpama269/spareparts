@@ -28,8 +28,8 @@
                         <a href="{% url 'core:login' %}" class="btn btn-primary btn-lg px-4 py-3 rounded-3 shadow-sm">
                             <i class="bi bi-box-arrow-in-right me-2"></i>Get Started
                         </a>
-                        <a href="{% url 'core:signup' %}" class="btn btn-outline-primary btn-lg px-4 py-3 rounded-3">
-                            <i class="bi bi-person-plus me-2"></i>Sign Up Free
+                        <a href="{% url 'core:contact' %}" class="btn btn-outline-primary btn-lg px-4 py-3 rounded-3">
+                            <i class="bi bi-envelope me-2"></i>Contact Us
                         </a>
                     {% else %}
                         <a href="{% url 'core:dashboard' %}" class="btn btn-primary btn-lg px-4 py-3 rounded-3 shadow-sm">
@@ -249,10 +249,10 @@
                         1
                     </span>
                 </div>
-                <h4 class="fw-bold mb-3">Create Account</h4>
+                <h4 class="fw-bold mb-3">Get Your Account</h4>
                 <p class="text-muted">
-                    Sign up in seconds and get access to your personalized dashboard
-                    with all the tools you need.
+                    Ask your administrator for an account with the correct role
+                    and access for your responsibilities.
                 </p>
             </div>
         </div>
@@ -308,8 +308,8 @@
 
             {% if not user.is_authenticated %}
                 <div class="d-flex flex-wrap justify-content-center gap-3">
-                    <a href="{% url 'core:signup' %}" class="btn btn-primary btn-lg px-5 py-3 rounded-3 shadow">
-                        <i class="bi bi-rocket-takeoff me-2"></i>Get Started Now
+                    <a href="{% url 'core:login' %}" class="btn btn-primary btn-lg px-5 py-3 rounded-3 shadow">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Login
                     </a>
                     <a href="{% url 'core:contact' %}" class="btn btn-outline-primary btn-lg px-5 py-3 rounded-3">
                         <i class="bi bi-chat-dots me-2"></i>Contact Sales

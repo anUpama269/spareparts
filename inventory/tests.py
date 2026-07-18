@@ -41,3 +41,17 @@ class DynamicInventoryPagesTests(TestCase):
         )
         self.assertContains(response, 'DP-001')
         self.assertContains(response, 'Reorder level')
+
+    def test_dashboard_critical_stock_alert_uses_two_unit_boundary(self):
+        self.item.quantity = 2
+        self.item.save(update_fields=['quantity'])
+        response = self.client.get(reverse('core:dashboard'))
+
+        self.assertIn(self.item, response.context['out_of_stock_items'])
+        self.assertContains(response, 'Critical Stock Alert')
+
+        self.item.quantity = 3
+        self.item.save(update_fields=['quantity'])
+        response = self.client.get(reverse('core:dashboard'))
+
+        self.assertNotIn(self.item, response.context['out_of_stock_items'])

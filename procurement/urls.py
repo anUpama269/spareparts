@@ -22,6 +22,7 @@ urlpatterns = [
     path('purchaseorderitems/', views.PurchaseOrderItemListView.as_view(), name='purchaseorderitem_list'),
 
     path('purchaseorderitems/<int:pk>/edit/', views.PurchaseOrderItemUpdateView.as_view(), name='purchaseorderitem_edit'),
+    path('purchaseorderitems/<int:pk>/receive/', views.PurchaseOrderItemReceiveView.as_view(), name='purchaseorderitem_receive'),
     path('purchaseorderitems/<int:pk>/delete/', views.PurchaseOrderItemDeleteView.as_view(), name='purchaseorderitem_delete'),
 
     # Work Orders

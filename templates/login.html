@@ -1,25 +1,13 @@
 {% extends 'base.html' %}
-
-{% block title %}Login | SpareParts{% endblock %}
-
+{% block title %}Sign in | SpareParts{% endblock %}
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5">
-        <div class="card shadow-sm">
-            <div class="card-header text-center bg-success text-white">
-                <h4>Login</h4>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-success w-100">Login</button>
-                </form>
-                <p class="text-center text-muted small mt-3 mb-0">
-                    Contact your administrator if you need an account.
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="row justify-content-center align-items-center py-4 py-lg-5"><div class="col-md-8 col-lg-5 col-xl-4">
+    <div class="text-center mb-4"><span class="brand-mark text-white mx-auto mb-3"><i class="bi bi-gear-wide-connected"></i></span><h1 class="h3 mb-2">Welcome back</h1><p class="text-muted">Sign in to continue to your operations workspace.</p></div>
+    <div class="card"><div class="card-body p-4 p-lg-5">
+        {% if form.non_field_errors %}<div class="alert alert-danger py-2">{{ form.non_field_errors }}</div>{% endif %}
+        <form method="post" novalidate>{% csrf_token %}{% for field in form %}<div class="mb-3"><label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>{{ field }}{% if field.errors %}<div class="errorlist">{{ field.errors|striptags }}</div>{% endif %}</div>{% endfor %}{% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}<button type="submit" class="btn btn-primary w-100 mt-2"><i class="bi bi-box-arrow-in-right"></i>Sign in</button></form>
+        <div class="d-flex align-items-center gap-2 mt-4 pt-3 border-top text-muted small"><i class="bi bi-shield-lock text-success"></i><span>Access is protected and assigned by your administrator.</span></div>
+    </div></div>
+    <p class="text-center text-muted small mt-3">Need access? <a href="{% url 'core:contact' %}" class="fw-semibold">Contact your administrator</a>.</p>
+</div></div>
 {% endblock %}

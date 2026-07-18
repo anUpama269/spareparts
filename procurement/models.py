@@ -43,6 +43,10 @@ class PurchaseOrderItem(models.Model):
     def __str__(self):
         return f"{self.part.name} ({self.quantity})"
 
+    @property
+    def remaining_quantity(self):
+        return max(self.quantity - self.received_quantity, 0)
+
 
 # ---------- Work Order ----------
 

@@ -96,7 +96,33 @@ class AuditLog(models.Model):
     action = models.CharField(max_length=255)
     object_type = models.CharField(max_length=50, blank=True, null=True)
     object_id = models.IntegerField(blank=True, null=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    details = models.JSONField(default=dict, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user} - {self.action} at {self.timestamp}"
+
+
+class AuditReport(models.Model):
+    STATUS_CHOICES = (
+        ('draft', 'Draft'),
+        ('submitted', 'Submitted'),
+    )
+
+    title = models.CharField(max_length=200)
+    scope = models.CharField(max_length=255)
+    findings = models.TextField()
+    recommendations = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    created_by = models.ForeignKey(
+        CustomUser, on_delete=models.PROTECT, related_name='audit_reports'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ('-created_at',)
+
+    def __str__(self):
+        return self.title

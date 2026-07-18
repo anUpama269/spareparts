@@ -13,6 +13,7 @@ class RoleRequiredMixin:
         'supplier': 'procurement', 'purchaseorder': 'procurement',
         'purchaseorderitem': 'procurement', 'workorder': 'workorders',
         'auditlog': 'audit',
+        'auditreport': 'audit',
     }
 
     def get_permission_required(self):

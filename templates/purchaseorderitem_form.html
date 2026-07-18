@@ -6,7 +6,7 @@
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Purchase Order Item Form</h4>
+            <h4 class="mb-0">{% if purchase_order %}Add item to PO-{{ purchase_order.pk|stringformat:"05d" }}{% else %}Update purchase order item{% endif %}</h4>
         </div>
 
         <div class="card-body">
@@ -18,7 +18,7 @@
                     <button type="submit" class="btn btn-success">
                         <i class="fa fa-save"></i> Save
                     </button>
-                    <a href="{% url 'procurement:purchaseorderitem_list' %}" class="btn btn-secondary">
+                    <a href="{% url 'procurement:purchaseorder_list' %}" class="btn btn-secondary">
                         Cancel
                     </a>
                 </div>

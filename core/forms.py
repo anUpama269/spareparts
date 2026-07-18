@@ -1,5 +1,5 @@
 from django import forms
-from .models import CustomUser, AccessPermission, Role
+from .models import AuditReport, CustomUser, AccessPermission, Role
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(required=False, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
@@ -57,4 +57,17 @@ class AccessPermissionForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'module': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
+class AuditReportForm(forms.ModelForm):
+    class Meta:
+        model = AuditReport
+        fields = ['title', 'scope', 'findings', 'recommendations', 'status']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'scope': forms.TextInput(attrs={'class': 'form-control'}),
+            'findings': forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
+            'recommendations': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
         }

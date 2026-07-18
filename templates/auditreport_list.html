@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load rbac %}
+{% block title %}Audit Reports | SpareParts{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div><span class="text-primary fw-bold small text-uppercase">Governance</span><h1 class="h3 mt-1 mb-1">Audit reports</h1><p class="text-muted mb-0">Document findings, scope, and recommended corrective actions.</p></div>
+    <div class="d-flex gap-2"><a href="{% url 'core:auditlog_list' %}" class="btn btn-outline-secondary"><i class="bi bi-clock-history"></i>Activity log</a>{% if user|has_access:'audit.reports.add' %}<a href="{% url 'core:auditreport_add' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i>New report</a>{% endif %}</div>
+</div>
+<div class="card"><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Report</th><th>Scope</th><th>Author</th><th>Status</th><th>Created</th></tr></thead><tbody>
+{% for report in reports %}<tr><td><a class="fw-bold text-decoration-none" href="{% url 'core:auditreport_detail' report.pk %}">{{ report.title }}</a><div class="small text-muted mt-1">{{ report.findings|truncatechars:90 }}</div></td><td>{{ report.scope }}</td><td>{{ report.created_by.username }}</td><td>{% if report.status == 'submitted' %}<span class="badge bg-success-subtle text-success">Submitted</span>{% else %}<span class="badge bg-warning-subtle text-warning-emphasis">Draft</span>{% endif %}</td><td><div>{{ report.created_at|date:"d M Y, H:i" }}</div><a href="{% url 'core:auditreport_detail' report.pk %}" class="small fw-semibold text-decoration-none">View document <i class="bi bi-arrow-right"></i></a></td></tr>
+{% empty %}<tr><td colspan="5" class="text-center py-5"><i class="bi bi-file-earmark-text fs-1 text-muted d-block mb-2"></i><strong>No audit reports yet</strong><div class="text-muted small">Create the first report to begin documenting findings.</div></td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

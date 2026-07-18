@@ -26,4 +26,7 @@ urlpatterns = [
 
     # Audit logs (admin only)
     path('audit-logs/', views.AuditLogListView.as_view(), name='auditlog_list'),
+    path('audit-reports/', views.AuditReportListView.as_view(), name='auditreport_list'),
+    path('audit-reports/add/', views.AuditReportCreateView.as_view(), name='auditreport_add'),
+    path('audit-reports/<int:pk>/', views.AuditReportDetailView.as_view(), name='auditreport_detail'),
 ]

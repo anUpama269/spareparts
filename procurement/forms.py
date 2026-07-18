@@ -1,6 +1,7 @@
 from django import forms
 from .models import Supplier, PurchaseOrder, PurchaseOrderItem, WorkOrder
 from parts.models import Part
+from inventory.models import Location
 from core.models import CustomUser
 
 # ---------- Supplier Form ----------
@@ -42,6 +43,33 @@ class PurchaseOrderItemForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+
+class ReceivePurchaseOrderItemForm(forms.Form):
+    quantity = forms.IntegerField(min_value=1)
+    location = forms.ModelChoiceField(queryset=Location.objects.none())
+
+    def __init__(self, *args, item, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.item = item
+        self.fields['quantity'].widget.attrs.update({
+            'class': 'form-control form-control-sm',
+            'max': item.remaining_quantity,
+            'aria-label': f'Quantity received for {item.part.name}',
+        })
+        self.fields['location'].queryset = Location.objects.order_by('name')
+        self.fields['location'].widget.attrs.update({
+            'class': 'form-select form-select-sm',
+            'aria-label': f'Receiving location for {item.part.name}',
+        })
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data['quantity']
+        if quantity > self.item.remaining_quantity:
+            raise forms.ValidationError(
+                f'Only {self.item.remaining_quantity} unit(s) remain outstanding.'
+            )
+        return quantity
 
 
 # ---------- Work Order Form ----------

@@ -1,15 +1,16 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView, LogoutView
-from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.db.models import Count, Q
 from parts.mixins import RoleRequiredMixin
 
-from .forms import UserForm, RoleForm, AccessPermissionForm
-from core.models import CustomUser, AuditLog, Role, AccessPermission
+from .forms import UserForm, RoleForm, AccessPermissionForm, AuditReportForm
+from core.models import CustomUser, AuditLog, AuditReport, Role, AccessPermission
 from inventory.models import Location, InventoryItem, StockTransaction, Equipment
 from procurement.models import Supplier, PurchaseOrder, PurchaseOrderItem, WorkOrder
 
@@ -54,7 +55,9 @@ def dashboard(request):
             'recent_transactions': StockTransaction.objects.select_related(
                 'inventory_item__part', 'performed_by'
             ).order_by('-timestamp')[:5],
-            'out_of_stock_items': InventoryItem.objects.filter(quantity=0).select_related('part', 'location')[:10],
+            'out_of_stock_items': InventoryItem.objects.filter(
+                quantity__lte=2
+            ).select_related('part', 'location').order_by('quantity')[:10],
         })
     if user.has_access('procurement.view'):
         context.update({
@@ -64,6 +67,19 @@ def dashboard(request):
     if user.has_access('workorders.view'):
         context.update({
             'tasks': WorkOrder.objects.filter(assigned_to=user).order_by('-created_at')[:10],
+        })
+    if user.has_access('audit.view'):
+        report_summary = AuditReport.objects.aggregate(
+            total=Count('id'),
+            drafts=Count('id', filter=Q(status='draft')),
+            submitted=Count('id', filter=Q(status='submitted')),
+        )
+        context.update({
+            'audit_report_total': report_summary['total'],
+            'audit_report_drafts': report_summary['drafts'],
+            'audit_report_submitted': report_summary['submitted'],
+            'recent_audit_reports': AuditReport.objects.select_related('created_by')[:5],
+            'recent_audit_logs': AuditLog.objects.select_related('user').order_by('-timestamp')[:6],
         })
     return render(request, 'dashboard.html', context)
 
@@ -124,6 +140,9 @@ class RoleListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
     template_name = 'role_list.html'
     context_object_name = 'roles'
     permission_required = 'users.manage'
+
+    def get_queryset(self):
+        return super().get_queryset().prefetch_related('permissions', 'users')
 
 
 class RoleCreateView(LoginRequiredMixin, RoleRequiredMixin, CreateView):
@@ -190,6 +209,56 @@ class AuditLogListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
     permission_required = 'audit.view'
     ordering = ['-timestamp']
     paginate_by = 50  # Add pagination for better performance
+
+    def get_queryset(self):
+        queryset = super().get_queryset().select_related('user')
+        username = self.request.GET.get('user', '').strip()
+        action = self.request.GET.get('action', '').strip()
+        date_from = self.request.GET.get('date_from', '').strip()
+        date_to = self.request.GET.get('date_to', '').strip()
+        if username:
+            queryset = queryset.filter(user__username__icontains=username)
+        if action:
+            queryset = queryset.filter(action__icontains=action)
+        if date_from:
+            queryset = queryset.filter(timestamp__date__gte=date_from)
+        if date_to:
+            queryset = queryset.filter(timestamp__date__lte=date_to)
+        return queryset
+
+
+class AuditReportListView(LoginRequiredMixin, RoleRequiredMixin, ListView):
+    model = AuditReport
+    template_name = 'auditreport_list.html'
+    context_object_name = 'reports'
+    permission_required = 'audit.view'
+    paginate_by = 25
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('created_by')
+
+
+class AuditReportDetailView(LoginRequiredMixin, RoleRequiredMixin, DetailView):
+    model = AuditReport
+    template_name = 'auditreport_detail.html'
+    context_object_name = 'report'
+    permission_required = 'audit.view'
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('created_by', 'created_by__role')
+
+
+class AuditReportCreateView(LoginRequiredMixin, RoleRequiredMixin, CreateView):
+    model = AuditReport
+    form_class = AuditReportForm
+    template_name = 'auditreport_form.html'
+    success_url = reverse_lazy('core:auditreport_list')
+    permission_required = 'audit.reports.add'
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        messages.success(self.request, 'Audit report created successfully.')
+        return super().form_valid(form)
 
 
 # ------------------------------

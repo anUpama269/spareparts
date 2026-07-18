@@ -1,4 +1,81 @@
-{% extends 'base.html' %}{% block title %}Roles{% endblock %}{% block content %}
-<div class="container py-4"><div class="d-flex justify-content-between mb-4"><div><h1 class="h3">Dynamic roles</h1><p class="text-muted">Roles and their permissions are stored in the database.</p></div><div><a class="btn btn-outline-primary" href="{% url 'core:permission_list' %}">Permissions</a> <a class="btn btn-primary" href="{% url 'core:role_add' %}">Add role</a></div></div>
-<div class="card shadow-sm border-0"><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Role</th><th>Code</th><th>Permissions</th><th>Users</th><th></th></tr></thead><tbody>{% for role in roles %}<tr><td><strong>{{ role.name }}</strong><br><small>{{ role.description }}</small></td><td><code>{{ role.code }}</code></td><td>{% for permission in role.permissions.all %}<span class="badge bg-secondary">{{ permission.name }}</span> {% empty %}<span class="text-muted">None</span>{% endfor %}</td><td>{{ role.users.count }}</td><td class="text-end"><a class="btn btn-sm btn-warning" href="{% url 'core:role_edit' role.pk %}">Edit</a> <a class="btn btn-sm btn-danger" href="{% url 'core:role_delete' role.pk %}">Delete</a></td></tr>{% empty %}<tr><td colspan="5">No roles created.</td></tr>{% endfor %}</tbody></table></div></div></div>
+{% extends 'base.html' %}
+{% block title %}Roles & Access | SpareParts{% endblock %}
+
+{% block extra_css %}
+<style>
+    .role-card { transition: transform .18s ease, box-shadow .18s ease; }
+    .role-card:hover { transform: translateY(-2px); box-shadow: 0 16px 38px rgba(15, 23, 42, .1) !important; }
+    .role-icon { width: 46px; height: 46px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 13px; background: linear-gradient(135deg, #dbeafe, #ecfeff); color: #2563eb; font-size: 1.2rem; }
+    .role-code { color: #64748b; font-size: .72rem; font-weight: 600; }
+    .role-meta { padding: .8rem 1rem; border: 1px solid #e2e8f0; border-radius: 11px; background: #f8fafc; }
+    .permission-chip { display: inline-flex; align-items: center; gap: .3rem; padding: .38rem .58rem; border: 1px solid #dbeafe; border-radius: 8px; background: #f8fbff; color: #334155; font-size: .72rem; font-weight: 700; }
+    .permission-chip i { color: #3b82f6; }
+    .permissions-toggle { color: #475569; font-size: .8rem; font-weight: 700; cursor: pointer; list-style: none; }
+    .permissions-toggle::-webkit-details-marker { display: none; }
+    .permissions-toggle::after { content: "\F282"; margin-left: .35rem; font-family: "bootstrap-icons"; font-size: .7rem; }
+    details[open] .permissions-toggle::after { content: "\F286"; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <span class="text-primary fw-bold small text-uppercase" style="letter-spacing:.1em;">Access control</span>
+        <h1 class="h2 mt-1 mb-1">Roles</h1>
+        <p class="text-muted mb-0">Organize responsibilities and control what each team can access.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-secondary" href="{% url 'core:permission_list' %}"><i class="bi bi-key"></i>Permissions</a>
+        <a class="btn btn-primary" href="{% url 'core:role_add' %}"><i class="bi bi-plus-lg"></i>Add role</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for role in roles %}
+        <div class="col-lg-6">
+            <article class="card role-card h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="role-icon"><i class="bi bi-person-badge"></i></div>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <div>
+                                    <h2 class="h5 fw-bold mb-1">{{ role.name }}</h2>
+                                    <code class="role-code">{{ role.code }}</code>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Actions for {{ role.name }}"><i class="bi bi-three-dots"></i></button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="{% url 'core:role_edit' role.pk %}"><i class="bi bi-pencil me-2"></i>Edit role</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="{% url 'core:role_delete' role.pk %}"><i class="bi bi-trash3 me-2"></i>Delete role</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <p class="text-muted small mt-3 mb-0">{% if role.description %}{{ role.description }}{% else %}Access profile for {{ role.name|lower }} responsibilities.{% endif %}</p>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 my-3">
+                        <div class="col-6"><div class="role-meta"><div class="small text-muted mb-1">Assigned users</div><div class="fw-bold"><i class="bi bi-people text-primary me-1"></i>{{ role.users.count }}</div></div></div>
+                        <div class="col-6"><div class="role-meta"><div class="small text-muted mb-1">Permissions</div><div class="fw-bold"><i class="bi bi-shield-check text-success me-1"></i>{{ role.permissions.count }}</div></div></div>
+                    </div>
+
+                    <details>
+                        <summary class="permissions-toggle">View permission details</summary>
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            {% for permission in role.permissions.all %}
+                                <span class="permission-chip" title="{{ permission.code }}"><i class="bi bi-check2"></i>{{ permission.name }}</span>
+                            {% empty %}
+                                <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>No permissions assigned.</span>
+                            {% endfor %}
+                        </div>
+                    </details>
+                </div>
+            </article>
+        </div>
+    {% empty %}
+        <div class="col-12"><div class="card"><div class="card-body text-center py-5"><i class="bi bi-person-badge fs-1 text-muted d-block mb-3"></i><h2 class="h5">No roles created</h2><p class="text-muted">Create a role to begin assigning access.</p><a class="btn btn-primary" href="{% url 'core:role_add' %}">Add your first role</a></div></div></div>
+    {% endfor %}
+</div>
 {% endblock %}
